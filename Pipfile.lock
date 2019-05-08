@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "1c0eb84e8b7ab0126c154b1f38d361e5032aa9c7336074a741ce03ac753674fb"
+            "sha256": "3f9da1bf0ae323572cbc344a491f81b9d15539b22650a0bad323d6fcebae5d68"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -18,10 +18,10 @@
     "default": {
         "aiodine": {
             "hashes": [
-                "sha256:5c18dca9e5398e8dd0f9cbc728c00207de71e2d132c33005e38454f33fb5a82f",
-                "sha256:7f58bdec4a33918c1f610f4491694cc6b547075f51c3a303077b722f777ca79d"
+                "sha256:dbc832aa68ca8e48d4156560358c7d98139399e52a8c5af6d45b8aa768722592",
+                "sha256:eb692b622a0c6728b6325f488f758ff18e7274a651898934d7b2925980a23d58"
             ],
-            "version": "==1.2.5"
+            "version": "==1.2.6"
         },
         "bocadillo": {
             "hashes": [
@@ -51,6 +51,12 @@
                 "sha256:5b94b49521f6456670fdb30cd82a4eca9412788a93fa6dd6df72c94d5a8ff2d7"
             ],
             "version": "==7.0"
+        },
+        "databases": {
+            "hashes": [
+                "sha256:d365cff2035c5177ef5fd8c5abf6671da01189521da64848a01251c870daf48f"
+            ],
+            "version": "==0.2.2"
         },
         "h11": {
             "hashes": [
@@ -113,6 +119,13 @@
             ],
             "version": "==1.1.1"
         },
+        "orm": {
+            "hashes": [
+                "sha256:29e58d976a7d6162c0a5d197dd226ec9d25f03723ac11db64bea568d74ee9154"
+            ],
+            "index": "pypi",
+            "version": "==0.1.4"
+        },
         "python-multipart": {
             "hashes": [
                 "sha256:f7bb5f611fc600d15fa47b3974c8aa16e93724513b49b5f95c81e6624c83fa43"
@@ -132,6 +145,12 @@
                 "sha256:d16a0141ec1a18405cd4ce8b4613101da75da0e9a7aec5bdd4fa804d0e0eba73"
             ],
             "version": "==1.12.0"
+        },
+        "sqlalchemy": {
+            "hashes": [
+                "sha256:91c54ca8345008fceaec987e10924bf07dcab36c442925357e5a467b36a38319"
+            ],
+            "version": "==1.3.3"
         },
         "starlette": {
             "hashes": [

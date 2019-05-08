@@ -9,6 +9,7 @@ pylint = "*"
 
 [packages]
 bocadillo = "*"
+orm = "<0.2,>=0.1"
 
 [requires]
 python_version = "3.7"
