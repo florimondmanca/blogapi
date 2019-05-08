@@ -9,7 +9,7 @@ This project was generated using [Bocadillo CLI][repo] version 0.2.1.
 Install Python dependencies:
 
 ```bash
-pip install -r requirements.txt
+pipenv install
 ```
 
 ## Usage
