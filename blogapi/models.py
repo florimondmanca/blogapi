@@ -14,12 +14,6 @@ database = Database(url, force_rollback=settings.TESTING)
 metadata = sqlalchemy.MetaData()
 
 
-def prepare_order_args(order_args):
-    from sqlalchemy.sql import text
-
-    return [text(arg) for arg in order_args]
-
-
 class PostQuerySet(QuerySet):
     async def create(self, **kwargs) -> "Post":
         kwargs["created"] = kwargs["modified"] = datetime.now()
@@ -52,26 +46,31 @@ class Post(orm.Model):
         kwargs["modified"] = datetime.now()
         await super().update(**kwargs)
 
-    async def _find_published(self, order_by, **filters):
+    async def _get_relative_id(
+        self, previous: bool = True
+    ) -> typing.Optional[int]:
         if not self.published:
             return None
-        qs = await (
+
+        filters = {
+            "published__lt" if previous else "published__gt": self.published
+        }
+        order_by = "published" + " desc" if previous else ""
+
+        results = await (
             Post.objects.published_only()
-            .filter(**filters)
             .order_by(order_by)
+            .filter(**filters)
             .all()
         )
-        return qs[0].id if qs else None
 
-    async def get_previous_id(self) -> typing.Optional["Post"]:
-        return await self._find_published(
-            "published desc", published__lt=self.published
-        )
+        return results[0].id if results else None
 
-    async def get_next_id(self) -> typing.Optional["Post"]:
-        return await self._find_published(
-            "published", published__gt=self.published
-        )
+    async def get_previous_id(self) -> typing.Optional[int]:
+        return await self._get_relative_id(previous=True)
+
+    async def get_next_id(self) -> typing.Optional[int]:
+        return await self._get_relative_id(previous=False)
 
 
 engine = sqlalchemy.create_engine(url)
