@@ -29,6 +29,6 @@ class PostDetail:
         res.json = dict(post)
 
     async def put(self, req, res, pk: int):
-        post: Post = await Post.objects.get(id=pk)
+        post = await Post.objects.get(id=pk)
         await post.update(**await req.json())
         res.json = dict(post)

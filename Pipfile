@@ -8,6 +8,7 @@ pytest = "*"
 pylint = "*"
 pytest-asyncio = "*"
 async-asgi-testclient = "*"
+alembic = "*"
 
 [packages]
 bocadillo = "*"
