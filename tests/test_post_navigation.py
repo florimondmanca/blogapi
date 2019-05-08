@@ -2,20 +2,9 @@ from datetime import datetime, timedelta
 
 import pytest
 
-from blogapi.models import Post
-
 pytestmark = pytest.mark.asyncio
 
 NAV_FIELDS = ("previous_id", "next_id")
-
-
-@pytest.fixture(name="create_post")
-def fixture_create_post(post_payload):
-    async def create(**kwargs):
-        kwargs = {**post_payload, **kwargs}
-        return await Post.objects.create(**kwargs)
-
-    return create
 
 
 @pytest.mark.parametrize("field", NAV_FIELDS)

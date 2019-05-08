@@ -42,9 +42,17 @@ class Post(orm.Model):
     image_url = URLField(allow_null=True)
     image_caption = orm.Text(allow_null=True)
 
+    @property
+    def is_published(self) -> bool:
+        return self.published is not None
+
     async def update(self, **kwargs) -> None:
         kwargs["modified"] = datetime.now()
         await super().update(**kwargs)
+
+    async def publish(self):
+        assert not self.is_published
+        await self.update(published=datetime.now())
 
     async def _get_relative_id(
         self, previous: bool = True

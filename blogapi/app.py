@@ -1,5 +1,5 @@
 import orm
-from bocadillo import App, HTTPError
+from bocadillo import App, HTTPError, view
 
 from .models import Post
 
@@ -36,3 +36,17 @@ class PostDetail:
         post = await Post.objects.get(id=pk)
         await post.update(**await req.json())
         res.json = dict(post)
+
+
+@app.route("/posts/{pk}/publication")
+@view(methods=["post"])
+async def publish(req, res, pk: int):
+    post = await Post.objects.get(id=pk)
+
+    if post.is_published:
+        res.status_code = 202
+    else:
+        await post.publish()
+        res.status_code = 201
+
+    res.json = dict(post)

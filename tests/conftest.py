@@ -28,8 +28,8 @@ async def fixture_client(app: App):
         yield client
 
 
-@pytest.fixture
-def post_payload():
+@pytest.fixture(name="post_payload")
+def fixture_post_payload():
     return {
         "title": "Hello, World",
         "description": "See how beautiful the world is",
@@ -37,3 +37,14 @@ def post_payload():
         "image_url": "http://images.net/example",
         "image_caption": "An example image",
     }
+
+
+@pytest.fixture(name="create_post")
+def fixture_create_post(post_payload):
+    from blogapi.models import Post
+
+    async def create(**kwargs):
+        kwargs = {**post_payload, **kwargs}
+        return await Post.objects.create(**kwargs)
+
+    return create
