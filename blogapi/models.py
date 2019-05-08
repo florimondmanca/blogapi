@@ -55,12 +55,12 @@ class Post(orm.Model):
         filters = {
             "published__lt" if previous else "published__gt": self.published
         }
-        order_by = "published" + " desc" if previous else ""
+        order_by = ("-" if previous else "") + "published"
 
         results = await (
             Post.objects.published_only()
-            .order_by(order_by)
             .filter(**filters)
+            .order_by(order_by)
             .all()
         )
 

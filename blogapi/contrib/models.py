@@ -1,5 +1,6 @@
 import typing
 import orm
+from sqlalchemy.sql import text
 
 __all__ = ["QuerySet"]
 
@@ -8,14 +9,12 @@ def prepare_order(model, order: typing.List[str]) -> typing.List[str]:
     prepared = []
 
     for clause in order:
-        try:
-            col_name, operation = clause.split(" ")
-        except ValueError:
-            col_name = clause
-            desc = False
-        else:
-            assert operation == "desc"
+        if clause.startswith("-"):
             desc = True
+            col_name = clause.lstrip("-")
+        else:
+            desc = False
+            col_name = clause
 
         col = model.__table__.columns[col_name]
         prepared.append(col.desc() if desc else col)
