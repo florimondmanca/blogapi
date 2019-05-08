@@ -26,7 +26,9 @@ class PostList:
 class PostDetail:
     async def get(self, req, res, pk: int):
         post = await Post.objects.get(id=pk)
-        res.json = dict(post)
+        res.json = dict(
+            post, next=await post.get_next(), previous=await post.get_previous()
+        )
 
     async def put(self, req, res, pk: int):
         post = await Post.objects.get(id=pk)

@@ -35,4 +35,4 @@ async def test_retrieve_post(client, post_payload):
 
     r = await client.get(f"/posts/{post.id}")
     assert r.status_code == 200
-    assert r.json() == dict(post)
+    assert r.json() == dict(post, next=None, previous=None)
