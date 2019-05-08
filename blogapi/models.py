@@ -28,13 +28,13 @@ class Post(orm.Model):
     id = orm.Integer(primary_key=True)
     title = orm.String(max_length=300)
     content = orm.Text(allow_blank=True)
-    created = orm.DateTime()
-    modified = orm.DateTime()
+    created = orm.DateTime(index=True)
+    modified = orm.DateTime(index=True)
     published = orm.DateTime(allow_null=True)
 
-    async def update(self, **kwargs):
+    async def update(self, **kwargs) -> None:
         kwargs["modified"] = datetime.now()
-        return await super().update(**kwargs)
+        await super().update(**kwargs)
 
 
 engine = sqlalchemy.create_engine(url)
