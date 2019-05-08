@@ -25,3 +25,8 @@ def reset_db():
 
     metadata.drop_all(engine)
     metadata.create_all(engine)
+
+
+@pytest.fixture
+def post_payload():
+    return {"title": "Hello, World", "content": "Hello, World"}
