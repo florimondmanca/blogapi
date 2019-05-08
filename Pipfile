@@ -6,6 +6,8 @@ verify_ssl = true
 [dev-packages]
 pytest = "*"
 pylint = "*"
+pytest-asyncio = "*"
+async-asgi-testclient = "*"
 
 [packages]
 bocadillo = "*"

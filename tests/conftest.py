@@ -1,5 +1,6 @@
 import pytest
-from bocadillo import App, configure, create_client
+from bocadillo import App, configure
+from async_asgi_testclient import TestClient
 
 from blogapi import settings
 
@@ -14,8 +15,8 @@ def fixture_app() -> App:
 
 
 @pytest.fixture(name="client")
-def fixture_client(app: App):
-    with create_client(app) as client:
+async def fixture_client(app: App):
+    async with TestClient(app) as client:
         yield client
 
 
