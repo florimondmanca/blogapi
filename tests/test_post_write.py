@@ -1,5 +1,7 @@
 import pytest
 
+from blogapi.models import Post
+
 pytestmark = pytest.mark.asyncio
 
 
@@ -23,3 +25,16 @@ async def test_if_required_field_missing_then_400(client, post_payload, field):
 async def test_if_optional_field_missing_then_ok(client, post_payload, field):
     del post_payload[field]
     await test_create_post(client, post_payload, resp_json={"content": ""})
+
+
+@pytest.mark.parametrize(
+    "field, value", [("title", "Title"), ("content", "Content")]
+)
+async def test_update_post(client, post_payload, field, value):
+    post = await Post.objects.create(**post_payload)
+    update = {field: value}
+    r = await client.put(f"/posts/{post.id}", json=update)
+    assert r.status_code == 200
+    assert r.json() == {**post, **update}
+    post = await Post.objects.get(id=post.id)
+    assert post[field] == value
