@@ -1,34 +1,54 @@
+import typing
 import orm
-from sqlalchemy.sql import text
 
 __all__ = ["QuerySet"]
 
 
-def prepare_order_args(order_args):
-    return [text(arg) for arg in order_args]
+def prepare_order(model, order: typing.List[str]) -> typing.List[str]:
+    prepared = []
+
+    for clause in order:
+        try:
+            col_name, operation = clause.split(" ")
+        except ValueError:
+            col_name = clause
+            desc = False
+        else:
+            assert operation == "desc"
+            desc = True
+
+        col = model.__table__.columns[col_name]
+        prepared.append(col.desc() if desc else col)
+
+    return prepared
 
 
 class QuerySet(orm.models.QuerySet):
-    def __init__(self, order_fields=None, **kwargs):
+    def __init__(
+        self, order: typing.Optional[typing.List[str]] = None, **kwargs
+    ):
         super().__init__(**kwargs)
-        self._order_fields = order_fields
+        self._order = order
 
     def build_select_expression(self):
         expr = super().build_select_expression()
 
-        if self._order_fields is not None:
-            order_fields = [text(arg) for arg in self._order_fields]
-            expr = expr.order_by(*order_fields)
+        if self._order is not None:
+            order = prepare_order(self.model_cls, self._order)
+            expr = expr.order_by(*order)
 
         return expr
 
-    def order_by(self, *fields):
-        if self._order_fields is not None:
-            fields = self._order_fields + fields
+    def order_by(self, *order):
+        if self._order is not None:
+            order = self._order + order
 
         return self.__class__(
             model_cls=self.model_cls,
             filter_clauses=self.filter_clauses,
-            select_related=self.select_related,
-            order_fields=fields,
+            select_related=self._select_related,
+            order=order,
         )
+
+
+orm.models.FILTER_OPERATORS.update({"is": "is_", "isnot": "isnot"})

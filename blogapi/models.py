@@ -25,9 +25,8 @@ class PostQuerySet(QuerySet):
         kwargs["created"] = kwargs["modified"] = datetime.now()
         return await super().create(**kwargs)
 
-    async def published_only(self) -> "PostQuerySet":
-
-        return self.filter(published=None)
+    def published_only(self) -> "PostQuerySet":
+        return self.filter(published__isnot=None)
 
 
 class Post(orm.Model):
@@ -53,32 +52,33 @@ class Post(orm.Model):
         kwargs["modified"] = datetime.now()
         await super().update(**kwargs)
 
-    async def _find_published(self, order_by, **kwargs):
+    async def _find_published(self, order_by, **filters):
         if not self.published:
             return None
-        qs = (
-            await Post.objects.published_only()
+        qs = await (
+            Post.objects.published_only()
+            .filter(**filters)
             .order_by(order_by)
-            .filter(**kwargs)
+            .all()
         )
-        return qs[0] if qs else None
+        return qs[0].id if qs else None
 
-    async def get_previous(self) -> typing.Optional["Post"]:
+    async def get_previous_id(self) -> typing.Optional["Post"]:
         return await self._find_published(
-            "-published", published__lt=self.published
+            "published desc", published__lt=self.published
         )
 
-    async def get_next(self) -> typing.Optional["Post"]:
+    async def get_next_id(self) -> typing.Optional["Post"]:
         return await self._find_published(
             "published", published__gt=self.published
         )
 
 
 engine = sqlalchemy.create_engine(url)
+metadata.create_all(engine)
 
 
 @plugin
 def use_db(app):
-    metadata.create_all(engine)
     app.on("startup", database.connect)
     app.on("shutdown", database.disconnect)
