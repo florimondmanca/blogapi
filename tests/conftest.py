@@ -1,8 +1,9 @@
 import pytest
-from blogapi import settings
 from bocadillo import configure, create_client
 
-settings.DATABASE_URL = "sqlite://:memory:"
+from blogapi import settings
+
+settings.TESTING = True
 
 
 @pytest.fixture(name="app")
@@ -10,9 +11,11 @@ def fixture_app():
     from blogapi.app import app
 
     configure(app)
+
     return app
 
 
-@pytest.fixture
-def client(app):
-    return create_client(app)
+@pytest.fixture(name="client")
+def fixture_client(app):
+    with create_client(app) as client:
+        yield client

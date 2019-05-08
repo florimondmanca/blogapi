@@ -1,6 +1,7 @@
 from starlette.config import Config
-from starlette.datastructures import URL
 
 config = Config(".env")
 
-DATABASE_URL = config("DATABASE_URL", cast=URL)
+DATABASE_URL = config("DATABASE_URL")
+TEST_DATABASE_URL = config("TEST_DATABASE_URL")
+TESTING = False

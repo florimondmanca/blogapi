@@ -1,9 +1,10 @@
 import orm
-from bocadillo import App, HTTPError
+from bocadillo import App, discover_providers, HTTPError
 
 from .models import Post
 
 app = App()
+discover_providers("blogapi.providerconf")
 
 
 @app.error_handler(orm.exceptions.NoMatch)
