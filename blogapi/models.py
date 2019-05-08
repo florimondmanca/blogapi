@@ -6,7 +6,7 @@ from bocadillo import plugin
 from databases import Database
 
 from . import settings
-from . import patches  # pylint: disable=unused-import
+from .contrib import URLField
 
 url = settings.TEST_DATABASE_URL if settings.TESTING else settings.DATABASE_URL
 database = Database(url, force_rollback=settings.TESTING)
@@ -26,11 +26,17 @@ class Post(orm.Model):
     objects = PostQuerySet()
 
     id = orm.Integer(primary_key=True)
+
     title = orm.String(max_length=300)
+    description = orm.Text(allow_blank=True)  # Social cards and RSS
     content = orm.Text(allow_blank=True)
+
     created = orm.DateTime(index=True)
     modified = orm.DateTime(index=True)
     published = orm.DateTime(allow_null=True)
+
+    image_url = URLField(allow_null=True)
+    image_caption = orm.Text(allow_null=True)
 
     async def update(self, **kwargs) -> None:
         kwargs["modified"] = datetime.now()

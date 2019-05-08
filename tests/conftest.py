@@ -30,4 +30,10 @@ async def fixture_client(app: App):
 
 @pytest.fixture
 def post_payload():
-    return {"title": "Hello, World", "content": "Hello, World"}
+    return {
+        "title": "Hello, World",
+        "description": "See how beautiful the world is",
+        "content": "It's a beautifyl day [...]",
+        "image_url": "http://images.net/example",
+        "image_caption": "An example image",
+    }

@@ -4,7 +4,17 @@ from blogapi.models import Post
 
 
 NUM_POSTS = 3
-EXPECTED_FIELDS = {"id", "title", "content", "created", "modified", "published"}
+EXPECTED_FIELDS = {
+    "id",
+    "title",
+    "content",
+    "description",
+    "created",
+    "modified",
+    "published",
+    "image_url",
+    "image_caption",
+}
 
 
 @pytest.mark.asyncio

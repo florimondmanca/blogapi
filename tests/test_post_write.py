@@ -4,10 +4,10 @@ import pytest
 
 from blogapi.models import Post
 
-from .utils import equal_dicts
+from .utils import ignore
 
 pytestmark = pytest.mark.asyncio
-equal = partial(equal_dicts, ignore=("created", "modified"))
+normalize = partial(ignore, fields=("created", "modified"))
 
 
 async def create_post(client, post_payload, status_code: int = 201):
@@ -18,7 +18,8 @@ async def create_post(client, post_payload, status_code: int = 201):
 
 async def test_create_post(client, post_payload):
     r = await create_post(client, post_payload, status_code=201)
-    assert equal(r.json(), {"id": 1, **post_payload, "published": None})
+    json = normalize(r.json())
+    assert json == {"id": 1, **post_payload, "published": None}
 
 
 @pytest.mark.parametrize("field", ["title"])
@@ -27,13 +28,22 @@ async def test_if_required_field_missing_then_400(client, post_payload, field):
     await create_post(client, post_payload, status_code=400)
 
 
-@pytest.mark.parametrize("field", ["content"])
-async def test_if_optional_field_missing_then_ok(client, post_payload, field):
+@pytest.mark.parametrize(
+    "field, value",
+    [
+        ("content", ""),
+        ("description", ""),
+        ("image_url", None),
+        ("image_caption", None),
+    ],
+)
+async def test_if_optional_field_missing_then_ok(
+    client, post_payload, field, value
+):
     del post_payload[field]
     r = await create_post(client, post_payload)
-    assert equal(
-        r.json(), {"id": 1, **post_payload, "content": "", "published": None}
-    )
+    json = normalize(r.json())
+    assert json == {"id": 1, **post_payload, field: value, "published": None}
 
 
 @pytest.mark.parametrize(
@@ -46,7 +56,9 @@ async def test_update_post(client, post_payload, field, value):
     r = await client.put(f"/posts/{post.id}", json=update)
     assert r.status_code == 200
 
-    assert equal(r.json(), {**post, **update})
+    json = normalize(r.json())
+    expected = normalize({**post, **update})
+    assert json == expected
 
     post = await Post.objects.get(id=post.id)
     assert post[field] == value
