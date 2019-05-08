@@ -21,8 +21,4 @@ class Post(orm.Model):
 
 
 engine = sqlalchemy.create_engine(url)
-
-if settings.TESTING:
-    metadata.drop_all(engine)
-
 metadata.create_all(engine)
