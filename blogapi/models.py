@@ -7,7 +7,8 @@ from bocadillo import plugin
 from databases import Database
 
 from . import settings
-from .contrib import URLField, QuerySet
+from .contrib.orm.fields import URLField
+from .contrib.orm.models import QuerySet
 
 url = settings.TEST_DATABASE_URL if settings.TESTING else settings.DATABASE_URL
 database = Database(url, force_rollback=settings.TESTING)

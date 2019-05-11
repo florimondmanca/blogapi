@@ -1,8 +1,5 @@
 import typing
 import orm
-from sqlalchemy.sql import text
-
-__all__ = ["QuerySet"]
 
 
 def prepare_order(model, order: typing.List[str]) -> typing.List[str]:

@@ -7,7 +7,7 @@ TESTING = False
 DATABASE_URL = config("DATABASE_URL")
 TEST_DATABASE_URL = config("TEST_DATABASE_URL")
 
-ALLOWED_HOSTS = ["127.0.0.1", "*.florimond.dev"]
+ALLOWED_HOSTS = ["localhost", "*.florimond.dev"]
 
 CORS = {
     "allow_origins": ["http://localhost:4200", "https://blog.florimond.dev"],

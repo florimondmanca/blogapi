@@ -2,10 +2,6 @@ import typing
 
 from starlette.datastructures import URL
 from typesystem import formats
-from typesystem.fields import FORMATS
-
-
-__all__ = []
 
 
 class TimeFormat(formats.TimeFormat):
@@ -37,8 +33,3 @@ class URLFormat(formats.BaseFormat):
 
     def serialize(self, obj: typing.Any) -> str:
         return obj
-
-
-FORMATS.update(
-    {"datetime": DateTimeFormat(), "time": TimeFormat(), "url": URLFormat()}
-)
