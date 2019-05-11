@@ -3,7 +3,11 @@ from starlette.authentication import AuthenticationError
 from starlette.middleware.authentication import AuthenticationMiddleware
 from starlette.requests import HTTPConnection
 
-from blogapi.contrib.starlette.auth import MultiAuthBackend, AuthResult
+from blogapi.contrib.starlette.auth import (
+    MultiAuthBackend,
+    InvalidCredentials,
+    AuthResult,
+)
 
 
 def get_default_backend() -> MultiAuthBackend:
@@ -34,6 +38,13 @@ def use_authentication(app: App) -> None:
     @app.error_handler(AuthenticationError)
     async def on_auth_error(req, res, exc):
         raise HTTPError(401, detail=str(exc))
+
+    @app.error_handler(InvalidCredentials)
+    async def on_invalid_crendentials(req, res, exc: InvalidCredentials):
+        headers = {}
+        if exc.scheme.lower() in ("basic", "bearer"):
+            headers["WWW-Authenticate"] = exc.scheme.capitalize()
+        raise HTTPError(401, detail=str(exc), headers=headers)
 
     # TODO: use `.add_middleware` once Bocadillo supports ASGI-compatible
     # middleware with error handling.

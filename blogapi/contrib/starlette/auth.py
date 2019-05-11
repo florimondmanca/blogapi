@@ -1,30 +1,37 @@
-import inspect
-import typing
 import base64
 import binascii
+import inspect
+import typing
 
 from starlette.authentication import (
     AuthCredentials,
     AuthenticationBackend,
     AuthenticationError,
     BaseUser,
+    UnauthenticatedUser,
 )
 from starlette.requests import HTTPConnection
 
 AuthResult = typing.Optional[typing.Tuple[AuthCredentials, BaseUser]]
 
 
+class InvalidCredentials(AuthenticationError):
+    def __init__(self, message, scheme: str = None):
+        super().__init__(message)
+        self.scheme = scheme
+
+
 class AuthBackend(AuthenticationBackend):
+    scheme: str = None
+
     def invalid_credentials(self) -> AuthenticationError:
-        return AuthenticationError(
-            "Could not authenticate with the provided credentials"
+        return InvalidCredentials(
+            "Could not authenticate with the provided credentials",
+            scheme=self.scheme,
         )
 
 
-class SchemeAuthBackend(AuthBackend):
-    scheme: str
-    base64_encoded: bool = False
-
+class BaseSchemeAuthBackend(AuthBackend):
     def get_credentials(self, conn: HTTPConnection) -> typing.Optional[str]:
         if "Authorization" not in conn.headers:
             return None
@@ -42,9 +49,6 @@ class SchemeAuthBackend(AuthBackend):
         return self.decode_credentials(credentials)
 
     def decode_credentials(self, credentials: str) -> str:
-        if not self.base64_encoded:
-            return credentials
-
         try:
             return base64.b64decode(credentials).decode("ascii")
         except (ValueError, UnicodeDecodeError, binascii.Error):
@@ -57,7 +61,7 @@ class SchemeAuthBackend(AuthBackend):
 
         user = await self.verify(credentials)
         if user is None:
-            return None
+            raise self.invalid_credentials()
 
         return AuthCredentials(["authenticated"]), user
 
@@ -65,11 +69,14 @@ class SchemeAuthBackend(AuthBackend):
         raise NotImplementedError
 
 
-class BasicAuthBackend(SchemeAuthBackend):
+class BasicAuthBackend(BaseSchemeAuthBackend):
     scheme = "basic"
 
     async def verify(self, credentials: str) -> typing.Optional[BaseUser]:
-        username, _, password = credentials.partition(":")
+        try:
+            username, password = credentials.split(":")
+        except ValueError:
+            raise self.invalid_credentials()
         return await self.check_user(username, password)
 
     async def check_user(
@@ -78,8 +85,11 @@ class BasicAuthBackend(SchemeAuthBackend):
         raise NotImplementedError
 
 
-class TokenAuthBackend(SchemeAuthBackend):
+class BearerTokenAuthBackend(BaseSchemeAuthBackend):
     scheme = "bearer"
+
+    class InvalidCredentials(AuthenticationError):
+        pass
 
     async def verify(self, credentials: str) -> typing.Optional[BaseUser]:
         return await self.check_token(token=credentials)
@@ -89,8 +99,29 @@ class TokenAuthBackend(SchemeAuthBackend):
 
 
 class APIKeyAuthBackend(AuthBackend):
-    header = "Api-Key"
-    # TODO
+    def __init__(self, *, header: str = None, query_param: str = None):
+        if not bool(header) ^ bool(query_param):
+            raise ValueError(
+                "exactly one of `header=` or `query_param=` must be set"
+            )
+        if header:
+            self.get_api_key = lambda conn: conn.headers.get(header)
+        else:
+            self.get_api_key = lambda conn: conn.query_param.get(query_param)
+
+    async def authenticate(self, conn: HTTPConnection) -> AuthResult:
+        api_key: typing.Optional[str] = self.get_api_key(conn)
+        if api_key is None:
+            return None
+
+        scopes = await self.verify(api_key)
+        if scopes is None:
+            raise self.invalid_credentials()
+
+        return AuthCredentials(scopes), UnauthenticatedUser()
+
+    async def verify(self, api_key: str) -> typing.Optional[typing.List[str]]:
+        raise NotImplementedError
 
 
 class MultiAuthBackend(AuthBackend):
@@ -104,8 +135,8 @@ class MultiAuthBackend(AuthBackend):
         for backend in self.backends:
             try:
                 auth_result = await backend.authenticate(conn)
-            except AuthenticationError:
-                break
+            except AuthenticationError as exc:
+                raise exc from None
 
             if auth_result is None:
                 continue
