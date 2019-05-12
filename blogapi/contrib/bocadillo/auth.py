@@ -1,13 +1,12 @@
-from bocadillo import App, plugin, HTTPError, settings
+from bocadillo import App, plugin, settings
 from starlette.authentication import AuthenticationError
 from starlette.middleware.authentication import AuthenticationMiddleware
 from starlette.requests import HTTPConnection
+from starlette_auth_toolkit.backends import MultiAuthBackend
+from starlette_auth_toolkit.datatypes import AuthResult
+from starlette_auth_toolkit.exceptions import InvalidCredentials
 
-from blogapi.contrib.starlette.auth import (
-    MultiAuthBackend,
-    InvalidCredentials,
-    AuthResult,
-)
+from .errors import HTTPError
 
 
 def get_default_backend() -> MultiAuthBackend:

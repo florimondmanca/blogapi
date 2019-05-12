@@ -12,7 +12,7 @@ normalize = partial(ignore, fields=("created", "modified"))
 
 async def create_post(client, post_payload, status_code: int = 201):
     r = await client.post("/posts", json=post_payload)
-    assert r.status_code == status_code, r.json()
+    assert r.status_code == status_code
     return r
 
 
