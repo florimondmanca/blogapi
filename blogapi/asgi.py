@@ -1,6 +1,5 @@
 from bocadillo import configure
 from .app import app
-from . import settings
-from blogapi.contrib.bocadillo import auth
+from . import settings, auth
 
 configure(app, settings)

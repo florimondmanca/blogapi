@@ -1,6 +1,7 @@
 import orm
 from bocadillo import App, HTTPError, view
 
+from .contrib.bocadillo import requires
 from .models import Post
 
 app = App()
@@ -13,9 +14,11 @@ async def on_no_match(req, res, exc):
 
 @app.route("/posts")
 class PostList:
+    # NOTE: won't work, see contrib/bocadillo/auth.py
     async def get(self, req, res):
         res.json = [dict(post) for post in await Post.objects.all()]
 
+    @requires("authenticated")
     async def post(self, req, res):
         post = await Post.objects.create(**await req.json())
         res.json = dict(post)

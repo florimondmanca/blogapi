@@ -3,6 +3,7 @@ from starlette_auth_toolkit.backends import BaseBasicAuthBackend
 import orm
 
 from .models import User
+from . import settings
 
 
 class BasicAuthBackend(BaseBasicAuthBackend):
@@ -18,3 +19,6 @@ class BasicAuthBackend(BaseBasicAuthBackend):
             return user
 
         return None
+
+
+settings.AUTH_BACKENDS = [BasicAuthBackend()]
