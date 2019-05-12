@@ -5,10 +5,12 @@ import orm
 import sqlalchemy
 from bocadillo import plugin
 from databases import Database
+from starlette.authentication import SimpleUser
 
 from . import settings
 from .contrib.orm.fields import URLField
 from .contrib.orm.models import QuerySet
+from .contrib.bocadillo.crypto import check_password, make_password
 
 url = settings.TEST_DATABASE_URL if settings.TESTING else settings.DATABASE_URL
 database = Database(url, force_rollback=settings.TESTING)
@@ -80,6 +82,22 @@ class Post(orm.Model):
 
     async def get_next_id(self) -> typing.Optional[int]:
         return await self._get_relative_id(previous=False)
+
+
+class User(SimpleUser, orm.Model):
+    __tablename__ = "users"
+    __database__ = database
+    __metadata__ = metadata
+
+    id = orm.Integer(primary_key=True)
+    username = orm.String(max_length=200)
+    password = orm.String(max_length=200)
+
+    async def check_password(self, password: str) -> bool:
+        return await check_password(password, hashed=self.password)
+
+    async def set_password(self, password: str):
+        self.password = await make_password(password)
 
 
 engine = sqlalchemy.create_engine(url)
